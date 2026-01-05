@@ -6,7 +6,7 @@ class ProUser extends BasicUser
     private $subStart;
     private $subEnd;
 
-    public function __construct($id = null, $username = '', $email = '', $password = '', $bio = '', $subStart = null, $subEnd = null) {
+    public function __construct($id = null, $username, $email, $password, $bio, $subStart = null, $subEnd = null) {
         parent::__construct($id, $username, $email, $password, $bio);
         $this->setRole('proUser');
         $this->subStart = $subStart;
