@@ -1,15 +1,9 @@
 <?php
-
 interface RepositoryInterface
 {
     public function find($id);
     
-    public function findAll();
+    public function login($email, $password);
     
-    public function findBy(array $criteria);
-    
-    public function save($entity);
-    
-    public function delete($id);
+    public function addUser(array $userData);
 }
-?>

@@ -1,102 +1,49 @@
 <?php
 abstract class User
 {
-    protected $id;
-    protected $username;
-    protected $email;
-    protected $password;
-    protected $bio;
-    protected $role;
-    protected $level;
-    protected $uploadCount;
-    protected $profileImg;
-    protected $createdAt;
-    protected $lastLogin;
+    protected int $id;
+    protected string $username;
+    protected string $email;
+    protected string $password;
+    protected string $bio;
+    protected string $role;
+    protected string $address;
+    protected DateTime $createdAt;
+    protected ?DateTime $lastLogin;
 
-    public function __construct($username, $email, $password, $bio, $role,$id = null, $level = null, $uploadCount = 0, $profileImg = null, $createdAt = null, $lastLogin = null) {
-        $this->id = $id;
-        $this->level = $level;
+    public function __construct($username, $email, $password, $bio, $role, $address, $createdAt, $lastLogin=Null) {
+        
         $this->username = $username;
         $this->email = $email;
-        $this->password = $password;
+        $this->password = $password_has($password, PASSWORD_BCRYPT);
         $this->bio = $bio;
         $this->role = $role;
-        $this->uploadCount = $uploadCount;
-        $this->profileImg = $profileImg;
+        $this->address= $address;
         $this->createdAt = $createdAt;
         $this->lastLogin = $lastLogin;
     }
 
-    abstract public function canCreatePrivateAlbum();
+    public function getId() { return $this->id;}
+    public function getUsername() { return $this->username;}
+    public function getEmail() { return $this->email;}
+    public function getPassword() { return $this->password;}
+    public function getBio() { return $this->bio;}
+    public function getRole() { return $this->role;}
+    public function getAddress() { return $this->address;}
+    public function getCreatedAt() { return $this->createdAt;}
+    public function getLastLogin() { return $this->lastLogin;}
 
-    public function getId() { 
-        return $this->id; 
-    }
-    public function getUsername() {
-        return $this->username; 
-    }
-    public function getEmail() { 
-        return $this->email; 
-    }
-    public function getRole() { 
-        return $this->role; 
-    }
-    public function getLevel() { 
-        return $this->level; 
-    }
-    public function getUploadCount() { 
-        return $this->uploadCount; 
-    }
-    public function getSubStart() { 
-        return $this->subStart; 
-    }
-    public function getSubEnd() { 
-        return $this->subEnd; 
-    }
-    public function getCreatedAt() { 
-        return $this->createdAt; 
-    }
-    public function getLastLogin() { 
-        return $this->lastLogin; 
-    }
+    
+    public function setUsername($username) { $this->username = $username;}
+    public function setEmail($email) {$this->email = $email;}
+    public function setPassword($password) { $this->password = $password;}
+    public function setBio($bio) { $this->bio = $bio;}
+    public function setRole($role) { $this->role = $role;}
+    public function setAddress($address) { $this->address = $address;}
+    public function setCreatedAt($createdAt) { $this->createdAt = $createdAt;}
+    public function setLastLogin($lastLogin) { $this->lastLogin = $lastLogin;}
 
-    public function setId($id) { 
-        $this->id = $id; 
-    }
-    public function setUsername($username) { 
-        $this->username = $username; 
-    }
-    public function setEmail($email) { 
-        $this->email = $email; 
-    }
-    public function setPassword($password) { 
-        $this->password = $password; 
-    }
-    public function setRole($role) { 
-        $this->role = $role; 
-    }
-    public function setUploadCount($uploadCount) { 
-        $this->uploadCount = $uploadCount; 
-    }
-    public function setSubStart($subStart) { 
-        $this->subStart = $subStart; 
-    }
-    public function setSubEnd($subEnd) { 
-        $this->subEnd = $subEnd; 
-    }
-    public function setProfileImg($profileImg) { 
-        $this->profileImg = $profileImg; 
-    }
-
-    public function hydrate(array $data)
-    {
-        foreach ($data as $key => $value) {
-            $method = 'set' . ucfirst($key);
-            if (method_exists($this, $method)) {
-                $this->$method($value);
-            }
-        }
-    }
+    
 
     public function displayInfo()
     {

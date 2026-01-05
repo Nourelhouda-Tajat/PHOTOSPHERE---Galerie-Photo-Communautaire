@@ -1,12 +1,11 @@
 <?php
-class ProUser extends BasicUser
+class ProUser extends User
 {
     private $subStart;
     private $subEnd;
 
-    public function __construct($username, $email, $password, $bio, $subStart = null, $subEnd = null, $id = null) {
-        parent::__construct( $username, $email, $password, $bio, $id);
-        $this->setRole('proUser');
+    public function __construct($username, $email, $password, $bio, $role, $address, $createdAt, $lastLogin, $subStart, $subEnd) {
+        parent::__construct($username, $email, $password, $bio, 'proUser', $address, $createdAt, $lastLogin=Null);
         $this->subStart = $subStart;
         $this->subEnd = $subEnd;
     }
@@ -16,31 +15,14 @@ class ProUser extends BasicUser
         return true; 
     }
 
-    public function getUploadLimit()
-    {
-        return null; 
-    }
+    
 
 
-    public function getSubStart()
-    {
-        return $this->subStart;
-    }
+    public function getSubStart() { return $this->subStart;}
+    public function getSubEnd() { return $this->subEnd;}
+    public function setSubStart($subStart) { $this->subStart = $subStart;}
+    public function setSubEnd($subEnd) { $this->subEnd = $subEnd;}
 
-    public function getSubEnd()
-    {
-        return $this->subEnd;
-    }
-
-    public function setSubStart($subStart)
-    {
-        $this->subStart = $subStart;
-    }
-
-    public function setSubEnd($subEnd)
-    {
-        $this->subEnd = $subEnd;
-    }
 
     public function isSubscriptionActive()
     {
