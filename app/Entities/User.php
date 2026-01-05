@@ -24,8 +24,6 @@ abstract class User
         $this->bio = $bio;
         $this->role = $role;
         $this->uploadCount = $uploadCount;
-        $this->subStart = $subStart;
-        $this->subEnd = $subEnd;
         $this->profileImg = $profileImg;
         $this->createdAt = $createdAt;
         $this->lastLogin = $lastLogin;
