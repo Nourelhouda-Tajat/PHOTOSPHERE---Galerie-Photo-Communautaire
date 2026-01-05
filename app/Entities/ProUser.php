@@ -1,13 +1,11 @@
 <?php
-namespace App\Entities;
-
 class ProUser extends BasicUser
 {
     private $subStart;
     private $subEnd;
 
-    public function __construct($id = null, $username, $email, $password, $bio, $subStart = null, $subEnd = null) {
-        parent::__construct($id, $username, $email, $password, $bio);
+    public function __construct($username, $email, $password, $bio, $subStart = null, $subEnd = null, $id = null) {
+        parent::__construct( $username, $email, $password, $bio, $id);
         $this->setRole('proUser');
         $this->subStart = $subStart;
         $this->subEnd = $subEnd;
@@ -54,3 +52,4 @@ class ProUser extends BasicUser
 
     
 }
+?>

@@ -1,9 +1,9 @@
 <?php
 class Moderator extends User
 {
-    public function __construct($id = null, $username, $email, $password, $level)
+    public function __construct( $username, $email, $password, $level,$id = null)
     {
-        parent::__construct($id, $username, $email, $password, '', 'moderator', $level, 0);
+        parent::__construct($username, $email, $password, '', 'moderator', $level, 0,$id);
     }
 
     public function canCreatePrivateAlbum()
@@ -12,3 +12,4 @@ class Moderator extends User
     }
 
 }
+?>

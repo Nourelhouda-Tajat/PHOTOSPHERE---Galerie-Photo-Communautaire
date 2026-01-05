@@ -11,3 +11,4 @@ try {
 
 // Test des constantes de rôle
 echo "Les rôles disponibles: basicUser, proUser, moderator, admin\n";
+?>

@@ -1,9 +1,9 @@
 <?php
 class Admin extends User
 {
-    public function __construct($id = null, $username, $email, $password)
+    public function __construct( $username, $email, $password, $id = null)
     {
-        parent::__construct($id, $username, $email, $password, '', 'admin', 'super', 0);
+        parent::__construct($username, $email, $password, '', 'admin', 'super', 0, $id);
     }
 
     public function canCreatePrivateAlbum()
@@ -12,3 +12,4 @@ class Admin extends User
     }
 
 }
+?>

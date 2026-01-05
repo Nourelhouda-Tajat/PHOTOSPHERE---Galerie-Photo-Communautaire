@@ -9,13 +9,11 @@ abstract class User
     protected $role;
     protected $level;
     protected $uploadCount;
-    protected $subStart;
-    protected $subEnd;
     protected $profileImg;
     protected $createdAt;
     protected $lastLogin;
 
-    public function __construct($username, $email, $password, $bio, $role,$id = null, $level = null, $uploadCount = 0, $subStart = null, $subEnd = null, $profileImg = null, $createdAt = null, $lastLogin = null) {
+    public function __construct($username, $email, $password, $bio, $role,$id = null, $level = null, $uploadCount = 0, $profileImg = null, $createdAt = null, $lastLogin = null) {
         $this->id = $id;
         $this->level = $level;
         $this->username = $username;
@@ -30,7 +28,6 @@ abstract class User
     }
 
     abstract public function canCreatePrivateAlbum();
-    abstract public function getUploadLimit();
 
     public function getId() { 
         return $this->id; 
@@ -106,3 +103,4 @@ abstract class User
         echo "Utilisateur: {$this->username} ({$this->role})\n";
     }
 }
+?>

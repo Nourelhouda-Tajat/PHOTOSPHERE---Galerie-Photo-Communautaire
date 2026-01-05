@@ -1,9 +1,9 @@
 <?php
 class BasicUser extends User
 {
-    public function __construct($id = null, $username, $email, $password, $bio)
+    public function __construct($username, $email, $password, $bio, $id = null)
     {
-        parent::__construct($id, $username, $email, $password, $bio, 'basicUser');
+        parent::__construct( $username, $email, $password, $bio, 'basicUser',$id);
     }
 
     public function canCreatePrivateAlbum()
@@ -16,7 +16,19 @@ class BasicUser extends User
         return 10;
     }
 
-    
+     public function resetCounter()
+    {
+        $today = new DateTime();
+        
+        if ($today->format('d') === '01' && $this->getUploadCount() > 0) {
+            $this->setUploadCount(0);
+            
+            return true;
+        }
+        
+        return false;
+    }
 
     
 }
+?>
