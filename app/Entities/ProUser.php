@@ -4,8 +4,8 @@ class ProUser extends User
     private $subStart;
     private $subEnd;
 
-    public function __construct($username, $email, $password, $bio, $role, $address, $createdAt, $lastLogin, $subStart, $subEnd) {
-        parent::__construct($username, $email, $password, $bio, 'proUser', $address, $createdAt, $lastLogin=Null);
+    public function __construct($username, $email, $password, $bio, $role, $createdAt, $lastLogin, $subStart, $subEnd) {
+        parent::__construct($username, $email, $password, $bio, 'proUser', $createdAt, $lastLogin=Null);
         $this->subStart = $subStart;
         $this->subEnd = $subEnd;
     }

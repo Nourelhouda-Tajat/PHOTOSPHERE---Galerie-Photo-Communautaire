@@ -2,9 +2,9 @@
 class BasicUser extends User
 {
     private int $uploadCount;
-    public function __construct($username, $email, $password, $bio, $uploadCount = 0)
+    public function __construct($username, $email, $password, $bio, $role, $createdAt, $lastLogin=Null, $uploadCount=0)
     {
-        parent::__construct($username, $email, $password, $bio, 'basicUser', $address, $createdAt, $lastLogin=Null);
+        parent::__construct($username, $email, $password, $bio, 'basicUser', $createdAt, $lastLogin=Null);
         $this->uploadCount= $uploadCount;
     }
     

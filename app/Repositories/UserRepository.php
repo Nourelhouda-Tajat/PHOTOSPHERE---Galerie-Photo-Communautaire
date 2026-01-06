@@ -1,205 +1,175 @@
 <?php
+// app/Repositories/UserRepository.php
+require_once __DIR__ . '/../Core/Database.php';
+require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . '/../services/UserFactory.php';
+require_once __DIR__ . '/RepositoryInterface.php';
+
 class UserRepository implements RepositoryInterface
 {
-    private $connection;
+    private $db;
     
-    public function __construct(PDO $connection)
+    public function __construct()
     {
-        $this->connection = $connection;
+        $this->db = Database::getConnection();
     }
     
-    public function find($id)
+    public function findAll()
     {
-        $stmt = $this->connection->prepare(
-            "SELECT * FROM user WHERE id = id"
-        );
-        $stmt->execute(['id' => $id]);
-        $data = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        if (!$data) {
-            return null;
-        }
-        
-        return $this->createUserFromData($data);
-    }
-    
-   
-    
-    
-        
-        $sql = "SELECT * FROM user";
-        if (!empty($where)) {
-            $sql .= " WHERE " . implode(' AND ', $where);
-        }
-        
-        $stmt = $this->connection->prepare($sql);
-        $stmt->execute($params);
-        
+        $stmt = $this->db->query("SELECT * FROM user");
         $users = [];
-        while ($data = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $users[] = $this->createUserFromData($data);
+        
+        while ($data = $stmt->fetch()) {
+            $user = UserFactory::createFromData($data);
+            $user->setId($data['id']); // On doit ajouter l'ID après création
+            $users[] = $user;
         }
         
         return $users;
     }
     
-    public function save($user)
+    public function findById($id): User
     {
-        if ($user->getId()) {
-            return $this->update($user);
-        } else {
-            return $this->create($user);
-        }
-    }
-    
-    public function delete($id)
-    {
-        $stmt = $this->connection->prepare(
-            "DELETE FROM user WHERE id = id"
-        );
-        return $stmt->execute(['id' => $id]);
-    }
-    
-    private function createUserFromData(array $data)
-    {
-        switch ($data['role']) {
-            case 'basicUser':
-                $user = new BasicUser(
-                    $data['id'],
-                    $data['username'],
-                    $data['email'],
-                    $data['password'],
-                    $data['bio']
-                );
-                break;
-                
-            case 'proUser':
-                $user = new ProUser(
-                    $data['id'],
-                    $data['username'],
-                    $data['email'],
-                    $data['password'],
-                    $data['bio'],
-                    $data['sub_start'],
-                    $data['sub_end']
-                );
-                break;
-                
-            case 'moderator':
-                $user = new Moderator(
-                    $data['id'],
-                    $data['username'],
-                    $data['email'],
-                    $data['password'],
-                    $data['level']
-                );
-                break;
-                
-            case 'admin':
-                $user = new Admin(
-                    $data['id'],
-                    $data['username'],
-                    $data['email'],
-                    $data['password']
-                );
-                break;
-                
-            default:
-                throw new \Exception("Rôle inconnu: {$data['role']}");
-        }
-        
-        $user->setUploadCount($data['upload_count']);
-        $user->setProfileImg($data['profile_img']);
-        $user->setCreatedAt($data['created_at']);
-        $user->setLastLogin($data['last_login']);
-        
-        return $user;
-    }
-    
-    private function create($user)
-    {
-        $stmt = $this->connection->prepare(
-            "INSERT INTO user (username, email, password, bio, role, level, 
-             upload_count, sub_start, sub_end, profile_img, created_at, last_login) 
-             VALUES (:username, :email, :password, :bio, :role, :level, 
-             :upload_count, :sub_start, :sub_end, :profile_img, :created_at, :last_login)"
-        );
-        
-        $result = $stmt->execute([
-            ':username' => $user->getUsername(),
-            ':email' => $user->getEmail(),
-            ':password' => password_hash($user->getPassword(), PASSWORD_BCRYPT),
-            ':bio' => $user->getBio(),
-            ':role' => $user->getRole(),
-            ':level' => $user->getLevel(),
-            ':upload_count' => $user->getUploadCount(),
-            ':sub_start' => $user->getSubStart(),
-            ':sub_end' => $user->getSubEnd(),
-            ':profile_img' => $user->getProfileImg(),
-            ':created_at' => $user->getCreatedAt(),
-            ':last_login' => $user->getLastLogin()
-        ]);
-        
-        if ($result) {
-            $user->setId($this->connection->lastInsertId());
-        }
-        
-        return $result;
-    }
-    
-    private function update($user)
-    {
-        $stmt = $this->connection->prepare(
-            "UPDATE user SET 
-             username = :username,
-             email = :email,
-             bio = :bio,
-             role = :role,
-             level = :level,
-             upload_count = :upload_count,
-             sub_start = :sub_start,
-             sub_end = :sub_end,
-             profile_img = :profile_img,
-             last_login = :last_login
-             WHERE id = :id"
-        );
-        
-        return $stmt->execute([
-            ':id' => $user->getId(),
-            ':username' => $user->getUsername(),
-            ':email' => $user->getEmail(),
-            ':bio' => $user->getBio(),
-            ':role' => $user->getRole(),
-            ':level' => $user->getLevel(),
-            ':upload_count' => $user->getUploadCount(),
-            ':sub_start' => $user->getSubStart(),
-            ':sub_end' => $user->getSubEnd(),
-            ':profile_img' => $user->getProfileImg(),
-            ':last_login' => $user->getLastLogin()
-        ]);
-    }
-    
-    public function findByEmail($email)
-    {
-        $stmt = $this->connection->prepare(
-            "SELECT * FROM user WHERE email = :email"
-        );
-        $stmt->execute([':email' => $email]);
-        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt = $this->db->prepare("SELECT * FROM user WHERE id = :id");
+        $stmt->execute(['id' => $id]);
+        $data = $stmt->fetch();
         
         if (!$data) {
             return null;
         }
         
-        return $this->createUserFromData($data);
+        $user = UserFactory::createFromData($data);
+        $user->setId($data['id']);
+        return $user;
     }
     
-    public function updateLastLogin($userId)
+    public function login($email, $password): bool
     {
-        $stmt = $this->connection->prepare(
-            "UPDATE user SET last_login = NOW() WHERE id = :id"
-        );
-        return $stmt->execute([':id' => $userId]);
+        $stmt = $this->db->prepare("SELECT * FROM user WHERE email = :email");
+        $stmt->execute(['email' => $email]);
+        $data = $stmt->fetch();
+        
+        if (!$data) {
+            return false;
+        }
+        
+        if (password_verify($password, $data['password'])) {
+            // Mettre à jour last_login
+            $updateStmt = $this->db->prepare(
+                "UPDATE user SET last_login = NOW() WHERE id = :id"
+            );
+            $updateStmt->execute(['id' => $data['id']]);
+            return true;
+        }
+        
+        return false;
+    }
+    
+    public function logout(): bool
+    {
+        // Simple retour true pour l'instant
+        return true;
+    }
+    
+    public function addUser(array $userData): User
+    {
+        // Hacher le mot de passe
+        $hashedPassword = password_hash($userData['password'], PASSWORD_BCRYPT);
+        
+        $stmt = $this->db->prepare("
+            INSERT INTO user (username, email, password, bio, role, level, upload_count, sub_start, sub_end)
+            VALUES (:username, :email, :password, :bio, :role, :level, :upload_count, :sub_start, :sub_end)
+        ");
+        
+        // Valeurs par défaut
+        $role = $userData['role'] ?? 'basicUser';
+        $level = $userData['level'] ?? null;
+        $uploadCount = $userData['upload_count'] ?? 0;
+        $subStart = $userData['sub_start'] ?? null;
+        $subEnd = $userData['sub_end'] ?? null;
+        
+        $stmt->execute([
+            'username' => $userData['username'],
+            'email' => $userData['email'],
+            'password' => $hashedPassword,
+            'bio' => $userData['bio'] ?? '',
+            'role' => $role,
+            'level' => $level,
+            'upload_count' => $uploadCount,
+            'sub_start' => $subStart,
+            'sub_end' => $subEnd
+        ]);
+        
+        // Récupérer l'ID
+        $userId = $this->db->lastInsertId();
+        
+        // Créer l'objet User
+        $userData['id'] = $userId;
+        $user = UserFactory::createFromData($userData);
+        $user->setId($userId);
+        
+        return $user;
+    }
+    
+    public function updateUser(User $user): bool
+    {
+        $stmt = $this->db->prepare("
+            UPDATE user SET 
+            username = :username,
+            email = :email,
+            password = :password,
+            bio = :bio,
+            role = :role,
+            level = :level,
+            upload_count = :upload_count,
+            sub_start = :sub_start,
+            sub_end = :sub_end
+            WHERE id = :id
+        ");
+        
+        // Préparer les données spécifiques au rôle
+        $data = [
+            'username' => $user->getUsername(),
+            'email' => $user->getEmail(),
+            'password' => $user->getPassword(),
+            'bio' => $user->getBio(),
+            'role' => $user->getRole(),
+            'id' => $user->getId()
+        ];
+        
+        // Ajouter les champs spécifiques
+        $role = $user->getRole();
+        if ($role == 'admin' && method_exists($user, 'getIsSuperAdmin')) {
+            $data['level'] = $user->getIsSuperAdmin() ? 'Super Admin' : 'Admin';
+            $data['upload_count'] = 0;
+            $data['sub_start'] = null;
+            $data['sub_end'] = null;
+        }
+        else if ($role == 'moderator' && method_exists($user, 'getLevel')) {
+            $data['level'] = $user->getLevel();
+            $data['upload_count'] = 0;
+            $data['sub_start'] = null;
+            $data['sub_end'] = null;
+        }
+        else if ($role == 'proUser' && method_exists($user, 'getSubStart') && method_exists($user, 'getSubEnd')) {
+            $data['level'] = null;
+            $data['upload_count'] = 0;
+            $data['sub_start'] = $user->getSubStart()->format('Y-m-d H:i:s');
+            $data['sub_end'] = $user->getSubEnd() ? $user->getSubEnd()->format('Y-m-d H:i:s') : null;
+        }
+        else { // basicUser
+            $data['level'] = null;
+            $data['upload_count'] = $user->getUploadCount();
+            $data['sub_start'] = null;
+            $data['sub_end'] = null;
+        }
+        
+        return $stmt->execute($data);
+    }
+    
+    public function delete(int $id): bool
+    {
+        $stmt = $this->db->prepare("DELETE FROM user WHERE id = :id");
+        return $stmt->execute(['id' => $id]);
     }
 }
-?>

@@ -7,18 +7,18 @@ abstract class User
     protected string $password;
     protected string $bio;
     protected string $role;
-    protected string $address;
-    protected DateTime $createdAt;
-    protected ?DateTime $lastLogin;
+    // protected string $address;
+    protected $createdAt;
+    protected $lastLogin;
 
-    public function __construct($username, $email, $password, $bio, $role, $address, $createdAt, $lastLogin=Null) {
+    public function __construct($username, $email, $password, $bio, $role, $createdAt, $lastLogin=Null) {
         
         $this->username = $username;
         $this->email = $email;
-        $this->password = $password_has($password, PASSWORD_BCRYPT);
+        $this->password = password_hash($password, PASSWORD_BCRYPT); 
         $this->bio = $bio;
         $this->role = $role;
-        $this->address= $address;
+        // $this->address= $address;
         $this->createdAt = $createdAt;
         $this->lastLogin = $lastLogin;
     }
