@@ -1,55 +1,39 @@
 <?php
-// public/test_userrepo_simple.php
+require_once __DIR__ . '/../app/Repositories/UserRepository.php';
 
-echo "🧪 Test UserRepository étape par étape\n";
-echo "=====================================\n\n";
 
-// Étape 1: Tester la connexion
-echo "1. Test de la connexion Database...\n";
-try {
-    require_once __DIR__ . '/../app/Core/Database.php';
-    $db = Database::getConnection();
-    echo "✅ Database::getConnection() réussi\n";
-} catch (Exception $e) {
-    echo "❌ Erreur: " . $e->getMessage() . "\n";
-    exit;
+$repo = new UserRepository();
+
+/* Afficher des utilisateurs existants */
+echo "Utilisateurs existants :\n";
+foreach ($repo->findAll() as $user) {
+    echo "- {$user->getId()} | {$user->getUsername()}\n";
 }
 echo "\n";
 
-// Étape 2: Tester UserFactory
-echo "2. Test de UserFactory...\n";
-try {
-    require_once __DIR__ . '/../app/services/UserFactory.php';
-    echo "✅ UserFactory chargé\n";
-} catch (Exception $e) {
-    echo "❌ Erreur: " . $e->getMessage() . "\n";
-    exit;
-}
-echo "\n";
+/* Ajouter un utilisateur */
+echo "Ajout d'un utilisateur...\n";
 
-// Étape 3: Tester UserRepository
-echo "3. Test de UserRepository...\n";
-try {
-    require_once __DIR__ . '/../app/Repositories/UserRepository.php';
-    $repo = new UserRepository();
-    echo "✅ UserRepository instancié\n";
-} catch (Exception $e) {
-    echo "❌ Erreur: " . $e->getMessage() . "\n";
-    exit;
-}
-echo "\n";
+$userData = [
+    'username' => 'user_2026',
+    'email' => 'user2026@test.com',
+    'password' => '123456',
+    'bio' => 'Test ajout d user',
+    'role' => 'basicUser'
+];
 
-// Étape 4: Tester findAll()
-echo "4. Test de findAll()...\n";
-try {
-    $users = $repo->findAll();
-    echo "✅ findAll() réussi: " . count($users) . " utilisateur(s)\n";
-    
-    foreach ($users as $user) {
-        echo "   - " . $user->getUsername() . " (" . $user->getRole() . ")\n";
-    }
-} catch (Exception $e) {
-    echo "❌ Erreur: " . $e->getMessage() . "\n";
-}
+$newUser = $repo->addUser($userData);
 
-echo "\n✅ Tous les tests sont terminés!\n";
+echo "Utilisateur ajouté\n";
+echo "ID généré : " . $newUser->getId() . "\n\n";
+
+/* Vérifier la recherche par ID */
+$found = $repo->findById($newUser->getId());
+
+echo "Recherche par ID : ";
+echo $found ? "OK  ({$found->getUsername()})\n\n" : "Échec\n\n";
+
+/*Nettoyage */
+$repo->delete($newUser->getId());
+echo "Utilisateur supprimé \n";
+ 

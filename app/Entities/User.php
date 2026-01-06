@@ -1,7 +1,7 @@
 <?php
 abstract class User
 {
-    protected int $id;
+    protected int $id = 0;
     protected string $username;
     protected string $email;
     protected string $password;
@@ -33,7 +33,7 @@ abstract class User
     public function getCreatedAt() { return $this->createdAt;}
     public function getLastLogin() { return $this->lastLogin;}
 
-    
+    public function setId($id) { $this->id = $id;}
     public function setUsername($username) { $this->username = $username;}
     public function setEmail($email) {$this->email = $email;}
     public function setPassword($password) { $this->password = $password;}

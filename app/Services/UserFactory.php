@@ -13,59 +13,80 @@ class UserFactory
     {
         $role = $data['role'];
         
+        // Gérer les champs optionnels avec des valeurs par défaut
+        $createdAt = isset($data['created_at']) && !empty($data['created_at']) 
+            ? new DateTime($data['created_at']) 
+            : new DateTime();
+            
+        $lastLogin = isset($data['last_login']) && !empty($data['last_login'])
+            ? new DateTime($data['last_login'])
+            : null;
+        
         if ($role == 'admin') {
             // Pour admin, on utilise le champ "level" pour déterminer si c'est un super admin
-            $isSuperAdmin = ($data['level'] == 'Super Admin');
+            $isSuperAdmin = (isset($data['level']) && $data['level'] == 'Super Admin');
             
-            return new Admin(
+            $user = new Admin(
                 $data['username'],
                 $data['email'],
                 $data['password'],
                 $data['bio'] ?? '',
                 'admin',
-                new DateTime($data['created_at']),
-                $data['last_login'] ? new DateTime($data['last_login']) : null,
+                $createdAt,
+                $lastLogin,
                 $isSuperAdmin
             );
         }
-        
-        if ($role == 'moderator') {
-            return new Moderator(
+        elseif ($role == 'moderator') {
+            $user = new Moderator(
                 $data['username'],
                 $data['email'],
                 $data['password'],
                 $data['bio'] ?? '',
                 'moderator',
-                new DateTime($data['created_at']),
-                $data['last_login'] ? new DateTime($data['last_login']) : null,
+                $createdAt,
+                $lastLogin,
                 $data['level'] ?? 'junior'
             );
         }
-        
-        if ($role == 'proUser') {
-            return new ProUser(
+        elseif ($role == 'proUser') {
+            $subStart = isset($data['sub_start']) && !empty($data['sub_start'])
+                ? new DateTime($data['sub_start'])
+                : new DateTime();
+                
+            $subEnd = isset($data['sub_end']) && !empty($data['sub_end'])
+                ? new DateTime($data['sub_end'])
+                : null;
+            
+            $user = new ProUser(
                 $data['username'],
                 $data['email'],
                 $data['password'],
                 $data['bio'] ?? '',
                 'proUser',
-                new DateTime($data['created_at']),
-                $data['last_login'] ? new DateTime($data['last_login']) : null,
-                $data['sub_start'] ? new DateTime($data['sub_start']) : new DateTime(),
-                $data['sub_end'] ? new DateTime($data['sub_end']) : null
+                $createdAt,
+                $lastLogin,
+                $subStart,
+                $subEnd
+            );
+        }
+        else {
+            $user = new BasicUser(
+                $data['username'],
+                $data['email'],
+                $data['password'],
+                $data['bio'] ?? '',
+                'basicUser',
+                $createdAt,
+                $lastLogin,
+                $data['upload_count'] ?? 0
             );
         }
         
-        // Par défaut: basicUser
-        return new BasicUser(
-            $data['username'],
-            $data['email'],
-            $data['password'],
-            $data['bio'] ?? '',
-            'basicUser',
-            new DateTime($data['created_at']),
-            $data['last_login'] ? new DateTime($data['last_login']) : null,
-            $data['upload_count'] ?? 0
-        );
+        if (isset($data['id']) && method_exists($user, 'setId')) {
+            $user->setId((int)$data['id']);
+        }
+        
+        return $user;
     }
 }

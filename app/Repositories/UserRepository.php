@@ -1,11 +1,10 @@
 <?php
 // app/Repositories/UserRepository.php
-require_once __DIR__ . '/../Core/Database.php';
-require_once __DIR__ . '/../../config/database.php';
-require_once __DIR__ . '/../services/UserFactory.php';
-require_once __DIR__ . '/RepositoryInterface.php';
 
-class UserRepository implements RepositoryInterface
+require_once __DIR__ . '/../Core/Database.php';
+require_once __DIR__ . '/../services/UserFactory.php';
+
+class UserRepository
 {
     private $db;
     
@@ -16,19 +15,18 @@ class UserRepository implements RepositoryInterface
     
     public function findAll()
     {
-        $stmt = $this->db->query("SELECT * FROM user");
+        $stmt = $this->db->query("SELECT * FROM user ORDER BY id");
         $users = [];
         
         while ($data = $stmt->fetch()) {
             $user = UserFactory::createFromData($data);
-            $user->setId($data['id']); // On doit ajouter l'ID après création
             $users[] = $user;
         }
         
         return $users;
     }
     
-    public function findById($id): User
+    public function findById($id)
     {
         $stmt = $this->db->prepare("SELECT * FROM user WHERE id = :id");
         $stmt->execute(['id' => $id]);
@@ -38,9 +36,7 @@ class UserRepository implements RepositoryInterface
             return null;
         }
         
-        $user = UserFactory::createFromData($data);
-        $user->setId($data['id']);
-        return $user;
+        return UserFactory::createFromData($data);
     }
     
     public function login($email, $password): bool
@@ -67,104 +63,53 @@ class UserRepository implements RepositoryInterface
     
     public function logout(): bool
     {
-        // Simple retour true pour l'instant
         return true;
     }
     
-    public function addUser(array $userData): User
+    public function addUser(array $userData)
     {
-        // Hacher le mot de passe
+        // Hasher le mot de passe
         $hashedPassword = password_hash($userData['password'], PASSWORD_BCRYPT);
         
-        $stmt = $this->db->prepare("
-            INSERT INTO user (username, email, password, bio, role, level, upload_count, sub_start, sub_end)
-            VALUES (:username, :email, :password, :bio, :role, :level, :upload_count, :sub_start, :sub_end)
-        ");
-        
-        // Valeurs par défaut
         $role = $userData['role'] ?? 'basicUser';
-        $level = $userData['level'] ?? null;
-        $uploadCount = $userData['upload_count'] ?? 0;
-        $subStart = $userData['sub_start'] ?? null;
-        $subEnd = $userData['sub_end'] ?? null;
         
-        $stmt->execute([
+        // Préparer la requête avec les champs obligatoires
+        $sql = "INSERT INTO user (username, email, password, bio, role, created_at) VALUES (:username, :email, :password, :bio, :role, NOW())";
+        
+        $params = [
             'username' => $userData['username'],
             'email' => $userData['email'],
             'password' => $hashedPassword,
             'bio' => $userData['bio'] ?? '',
-            'role' => $role,
-            'level' => $level,
-            'upload_count' => $uploadCount,
-            'sub_start' => $subStart,
-            'sub_end' => $subEnd
-        ]);
+            'role' => $role
+        ];
         
-        // Récupérer l'ID
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        
+        // Récupérer l'ID généré automatiquement
         $userId = $this->db->lastInsertId();
         
-        // Créer l'objet User
-        $userData['id'] = $userId;
-        $user = UserFactory::createFromData($userData);
-        $user->setId($userId);
-        
-        return $user;
+        // Pour récupérer l'utilisateur complet, on peut le chercher par ID
+        return $this->findById($userId);
     }
     
-    public function updateUser(User $user): bool
+    public function updateUser($user): bool
     {
         $stmt = $this->db->prepare("
             UPDATE user SET 
             username = :username,
             email = :email,
-            password = :password,
-            bio = :bio,
-            role = :role,
-            level = :level,
-            upload_count = :upload_count,
-            sub_start = :sub_start,
-            sub_end = :sub_end
+            bio = :bio
             WHERE id = :id
         ");
         
-        // Préparer les données spécifiques au rôle
-        $data = [
+        return $stmt->execute([
             'username' => $user->getUsername(),
             'email' => $user->getEmail(),
-            'password' => $user->getPassword(),
             'bio' => $user->getBio(),
-            'role' => $user->getRole(),
             'id' => $user->getId()
-        ];
-        
-        // Ajouter les champs spécifiques
-        $role = $user->getRole();
-        if ($role == 'admin' && method_exists($user, 'getIsSuperAdmin')) {
-            $data['level'] = $user->getIsSuperAdmin() ? 'Super Admin' : 'Admin';
-            $data['upload_count'] = 0;
-            $data['sub_start'] = null;
-            $data['sub_end'] = null;
-        }
-        else if ($role == 'moderator' && method_exists($user, 'getLevel')) {
-            $data['level'] = $user->getLevel();
-            $data['upload_count'] = 0;
-            $data['sub_start'] = null;
-            $data['sub_end'] = null;
-        }
-        else if ($role == 'proUser' && method_exists($user, 'getSubStart') && method_exists($user, 'getSubEnd')) {
-            $data['level'] = null;
-            $data['upload_count'] = 0;
-            $data['sub_start'] = $user->getSubStart()->format('Y-m-d H:i:s');
-            $data['sub_end'] = $user->getSubEnd() ? $user->getSubEnd()->format('Y-m-d H:i:s') : null;
-        }
-        else { // basicUser
-            $data['level'] = null;
-            $data['upload_count'] = $user->getUploadCount();
-            $data['sub_start'] = null;
-            $data['sub_end'] = null;
-        }
-        
-        return $stmt->execute($data);
+        ]);
     }
     
     public function delete(int $id): bool
