@@ -1,31 +1,32 @@
 <?php
 
 class Post{
-    private string $title;
-    private string $imageName;
-    private string $description;
-    private int $views;
-    private string $status;
+    private int $id_album;
+    private string $name;
+    private boolean $public;
+    private string $cover;
+    private DateTime $publishAt;
+    private DateTime $updateAt;
 
     
-    public function __construct($title, $imageName, $description, $views, $status='draft'){
-        $this->title=$title;
-        $this->imageName=$imageName;
+    public function __construct($name, $public, $cover, $publishAt, $updateAt){
+        $this->name=$name;
+        $this->public=$public;
         $this->description=$description;
-        $this->views=$views;
-        $this->status=$status;
+        $this->publishAt=new DateTime();
+        $this->updateAt=Null;
     }
-    public function getTitle() { return $this->title;}
-    public function getImageName() { return $this->imageName;}
+    public function getName() { return $this->name;}
+    public function getPublic() { return $this->public;}
     public function getDescription() { return $this->description;}
-    public function getViews() { return $this->views;}
-    public function getStatus() { return $this->status;}
+    public function getpublishAt() { return $this->publishAt;}
+    public function getApdateAt() { return $this->updateAt;}
 
-    public function setTitle($title) { $this->title = $title;}
-    public function setImageName($imageName) { $this->imageName = $imageName;}
+    public function setName($name) { $this->name = $name;}
+    public function setPublic($public) { $this->public = $public;}
     public function setDescription($description) { $this->description = $description;}
-    public function setViews($views) { $this->views = $views;}
-    public function setStatus($status) { $this->status = $status;}
+    public function getpublishAt($publishAt) { $this->publishAt = $publishAt;}
+    public function setStatus($updateAt) { $this->updateAt = $updateAt;}
 
 }
 ?>
