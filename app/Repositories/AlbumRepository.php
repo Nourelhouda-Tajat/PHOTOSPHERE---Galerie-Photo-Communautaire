@@ -1,7 +1,6 @@
 <?php
 require_once __DIR__ . '/../Core/Database.php';
 require_once __DIR__ . '/UserRepository.php';
-// require_once __DIR__ . '/../Entities/User.php';
 
 
 class AlbumRepository{
@@ -256,7 +255,7 @@ public function deleteAlbum(int $albumId, int $userId): bool
 
 //test
 $albumRepo = new AlbumRepository();
-//test1
+// test1
 // try {
 //     $albumId = $albumRepo->createAlbum(3,' favoris', 'Description test', true);
 //     echo "Album créé son ID : " . $albumId;

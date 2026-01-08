@@ -1,76 +1,76 @@
 <?php
+require_once __DIR__ . '/../Core/Database.php';  
 
-require_once __DIR__ . '/../Core/Database.php';
-require_once __DIR__ . '/../Entities/Photo.php';
+class PhotoRepository {
 
-class PhotoRepository
-{
-    private $pdo;
+    private $db;
 
-    public function __construct($pdo) {
-        $this->pdo = $pdo;
+    public function __construct()
+    {
+        $this->db = Database::getConnection();
     }
 
     public function saveWithTags($photoTitle, $tags) {
 
-            // filtrer array des tags
-            $uniqueTags = [];
-            foreach ($tags as $tag) {
-                if (!in_array($tag, $uniqueTags)) {
-                    $uniqueTags[] = $tag;
-                }
+        // filtrer array des tags
+        $uniqueTags = [];
+        foreach ($tags as $tag) {
+            if (!in_array($tag, $uniqueTags)) {
+                $uniqueTags[] = $tag;
             }
-            $tags = $uniqueTags;
+        }
+        $tags = $uniqueTags;
 
-            // nbr de tag: ok
-            if (count($tags) < 1 || count($tags) > 10) {
-                return false;
-            }
+        // nbr de tag: ok
+        if (count($tags) < 1 || count($tags) > 10) {
+            return false;
+        }
 
-            
-            $this->pdo->beginTransaction();
+        
+        $this->db->beginTransaction();
 
-            // Insert photo
-            $stmt = $this->pdo->prepare(
-                "INSERT INTO photos (title) VALUES (?)"
+        // Insert photo
+        $stmt = $this->db->prepare(
+                "INSERT INTO Photo (title, img_link, user_id, state, created_at, updated_at) 
+                 VALUES (?, 'uploads/default.jpg', 1, 'draft', NOW(), NOW())"
             );
-            if (!$stmt->execute([$photoTitle])) {
-                $this->pdo->rollBack();
-                return false;
-            }
+        if (!$stmt->execute([$photoTitle])) {
+            $this->db->rollBack();
+            return false;
+        }
 
-            $photoId = $this->pdo->lastInsertId();
+        $photoId = $this->db->lastInsertId();
 
-            foreach ($tags as $tag) {
+        foreach ($tags as $tag) {
 
-                // Check tag
-                $stmt = $this->pdo->prepare(
-                    "SELECT id FROM tags WHERE name = ?"
+            // Check tag
+            $stmt = $this->db->prepare(
+                "SELECT id FROM tag WHERE name = ?"
+            );
+            $stmt->execute([$tag]);
+            $tagId = $stmt->fetchColumn();
+            if (!$tagId) {
+                $stmt = $this->db->prepare(
+                    "INSERT INTO tag (name) VALUES (?)"
                 );
-                $stmt->execute([$tag]);
-                $tagId = $stmt->fetch();
-                if (!$tagId) {
-                    $stmt = $this->pdo->prepare(
-                        "INSERT INTO tags (name) VALUES (?)"
-                    );
-                    if (!$stmt->execute([$tag])) {
-                        $this->pdo->rollBack();
-                        return false;
-                    }
-                    $tagId = $this->pdo->lastInsertId();
-                }
-
-                // add photo and tag
-                $stmt = $this->pdo->prepare(
-                    "INSERT INTO photo_tags (photo_id, tag_id) VALUES (?, ?)"
-                );
-                if (!$stmt->execute([$photoId, $tagId])) {
-                    $this->pdo->rollBack();
+                if (!$stmt->execute([$tag])) {
+                    $this->db->rollBack();
                     return false;
                 }
+                $tagId = $this->db->lastInsertId();
             }
-            $this->pdo->commit();
-            return true;
-    } 
 
+            // add photo and tag
+            $stmt = $this->db->prepare(
+                "INSERT INTO photo_tag (photo_id, tag_id) VALUES (?, ?)"
+            );
+            if (!$stmt->execute([$photoId, $tagId])) {
+                $this->db->rollBack();
+                return false;
+            }
+        }
+        $this->db->commit();
+        return true;
+    }
 }
+

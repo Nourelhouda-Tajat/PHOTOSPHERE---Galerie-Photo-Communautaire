@@ -2,13 +2,13 @@
 
 trait TimestampableTrait
 {
-    protected ?\DateTimeInterface $createdAt = null;
+    protected ?DateTimeInterface $createdAt = null;
 
-    protected ?\DateTimeInterface $updatedAt = null;
+    protected ?DateTimeInterface $updatedAt = null;
 
     public function initializeTimestamps(): void
     {
-        $now = new \DateTime();
+        $now = new DateTime();
 
         if ($this->createdAt === null) {
             $this->createdAt = $now;
@@ -19,7 +19,7 @@ trait TimestampableTrait
 
     public function updateTimestamps(): void
     {
-        $this->updatedAt = new \DateTime();
+        $this->updatedAt = new DateTime();
     }
 
     public function getCreatedAt(?string $format = null)

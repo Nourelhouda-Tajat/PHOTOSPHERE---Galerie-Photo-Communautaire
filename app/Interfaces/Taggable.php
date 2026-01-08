@@ -1,5 +1,5 @@
 <?php
-interface RepositoryInterface{
+interface Taggable{
     public function addTag(string $tag): void;
     public function removeTag(string $tag): void;
     public function getTags(): array;

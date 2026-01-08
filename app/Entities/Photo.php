@@ -1,5 +1,10 @@
 <?php
 
+require_once __DIR__ . '/../Interfaces/Taggable.php';
+require_once __DIR__ . '/../Interfaces/Commentable.php';
+require_once __DIR__ . '/../Interfaces/Likeable.php';
+require_once __DIR__ . '/../Traits/TaggableTrait.php';
+require_once __DIR__ . '/../Traits/TimestampableTrait.php';
 class Photo implements Taggable, Commentable, Likeable
 {
     use TaggableTrait;
@@ -15,14 +20,21 @@ class Photo implements Taggable, Commentable, Likeable
     private int $view_count;
     private ?string $published_at;
     private int $user_id;
-
-    /** Visibilité */
     private bool $isPublic = false;
-
     private int $likeCount = 0;
     private int $commentCount = 0;
 
-    public function __construct($title, $img_link, $user_id, $description = null, $img_size = null, $dimensions = null, $state = 'draft', $view_count = 0, $published_at = null) {
+    public function __construct(
+        string $title,
+        string $img_link,
+        int $user_id,
+        ?string $description = null,
+        ?int $img_size = null,
+        ?string $dimensions = null,
+        string $state = 'draft',
+        int $view_count = 0,
+        ?string $published_at = null
+    ) {
         $this->title = $title;
         $this->img_link = $img_link;
         $this->user_id = $user_id;
@@ -32,6 +44,7 @@ class Photo implements Taggable, Commentable, Likeable
         $this->state = $state;
         $this->view_count = $view_count;
         $this->published_at = $published_at;
+
         $this->initializeTimestamps();
     }
 
@@ -110,7 +123,5 @@ class Photo implements Taggable, Commentable, Likeable
     }
 
     protected function loadTagsFromDatabase(): void
-    {
-
-    }
+    { }
 }
